@@ -1,16 +1,14 @@
 #  Highly Available Hadoop Cluster with Docker
 
-
----
-
 ##  Table of Contents
 
 - [ Project Overview](#-project-overview)
 - [ Cluster Architecture](#-cluster-architecture)
 - [ Services & Roles](#️-services--roles)
-- [ Cluster Setup with Docker](#-cluster-setup-with-docker)
 - [ Usage Instructions](#-usage-instructions)
-- [ Validation & Testing](#-validation--testing)
+- [ Checking failover](#-Checking-failover)
+- [ Running a MapReduce Job](#-Running-a-MapReduce-Job)
+- [ Adding a New Worker](#-Adding-a-New-Worker)
 - [ Conclusion](#-conclusion)
 
 ---
@@ -54,7 +52,7 @@ Each Master node hosts essential services to maintain Hadoop high availability. 
 
 ---
 
-## ⚙️ Services & Roles
+## Services & Roles
 
 ### Master Node Services:
 
@@ -70,25 +68,6 @@ Each Master node hosts essential services to maintain Hadoop high availability. 
 
 ---
 
-##  Cluster Setup with Docker
-
-This project leverages Docker to automate the deployment of a fully functional HA Hadoop cluster.
-
-- Docker Compose orchestrates all required containers.
-- Each master/worker runs in an isolated Docker container.
-- Named volumes and custom networks ensure reliable communication.
-- Configuration files are mounted for dynamic and centralized control.
-
-**Technologies Used:**
-- Docker
-- Docker Compose
-- Bash scripts
-- Hadoop 3.x
-- Java 8
-- ZooKeeper
-
-
----
 
 ##  Usage Instructions
 
@@ -105,19 +84,54 @@ docker-compose up --build
 docker exec -it <container_id> jps
 ```
 
-4. Access Hadoop UIs on:
-- HDFS UI: `http://<master-node>:9870`
-- YARN UI: `http://<master-node>:8088`
+- Services ports
+
+
+| Service   | HDFS NameNode Web UI Port   | YARN ResourceManager Web UI Port|
+|------------|------------|-----------|
+| master1 | 9871|  8081
+| master2| 9872|  8082
+| master3| 9873| 8083
 
 ---
 
-##  Validation & Testing
+## Checking failover
 
-- Test failover by killing active NameNode/ResourceManager and observing auto-switchover.
-- Check data replication across DataNodes.
-- Submit sample MapReduce job and monitor progress via YARN UI.
-- Run HDFS commands (`hdfs dfs -ls /`, etc.) from any master or worker.
 
+```bash
+# Check HA status to see active and standby services
+hdfs haadmin -getAllServiceState
+yarn rmadmin -getAllServiceState
+```
+
+- Test HDFS Failover
+```bash
+hdfs --daemon stop namenode   # Simulate active NN failure
+```
+
+- Test YARN Failover
+```bash
+yarn --daemon stop resourcemanagerhdfs  # Simulate ResourceManager failure
+``` 
+
+
+## Running a MapReduce Job
+```bash
+hduser@master1:~$ hdfs dfs -mkdir -p /input
+hduser@master1:~$ echo 'Hello Hadoop' > test.txt
+hduser@master1:~$ hdfs dfs -put test.txt /input/
+hduser@master1:~$ hadoop jar \
+/usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar \
+wordcount /input/test.txt /output
+hduser@master1:~$ hdfs dfs -cat /output/part-r-00000
+
+```
+
+## Adding a New Worker
+
+```bash
+docker run -d --name worker2  --hostname worker2  --network hahadoop_hadoop-network  -e "YARN_CONF_DIR=/usr/local/hadoop/etc/hadoop"  -e "HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop"  --volume hadoop_datanode2:/hadoop/dfs/data   hahadoop-worker1:latest
+```
 ---
 
 ##  Conclusion
@@ -128,3 +142,6 @@ This project demonstrates a complete hands-on implementation of a **highly avail
 - Effective use of containerization for Big Data infrastructure.
 
 ---
+
+### Author
+Developed by [Mennatullah Atta](https://github.com/Mennatullahatta)
