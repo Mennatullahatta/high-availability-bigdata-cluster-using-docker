@@ -1,15 +1,17 @@
 #  Highly Available Hadoop Cluster with Docker
 
-##  Table of Contents
 
-- [ Project Overview](#-project-overview)
-- [ Cluster Architecture](#-cluster-architecture)
-- [ Services & Roles](#️-services--roles)
-- [ Usage Instructions](#-usage-instructions)
-- [ Checking failover](#-Checking-failover)
-- [ Running a MapReduce Job](#-Running-a-MapReduce-Job)
-- [ Adding a New Worker](#-Adding-a-New-Worker)
-- [ Conclusion](#-conclusion)
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Cluster Architecture](#cluster-architecture)
+- [Services & Roles](#services--roles)
+- [Usage Instructions](#usage-instructions)
+- [Checking Failover](#checking-failover)
+- [Running a MapReduce Job](#running-a-mapreduce-job)
+- [Adding a New Worker](#adding-a-new-worker)
+- [Conclusion](#conclusion)
+
 
 ---
 
