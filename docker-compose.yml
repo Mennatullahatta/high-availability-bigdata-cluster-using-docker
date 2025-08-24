@@ -1,0 +1,123 @@
+services:
+  master1:
+    build:
+      context: .
+    hostname: master1
+    container_name: master1
+    ports:
+      - "9871:9870"
+      - "8081:8088"
+    volumes:
+      - master1-journal:/hadoop/dfs/journal
+      - master1-name:/hadoop/dfs/name
+      - master1-zk:/usr/local/zookeeper/data
+    networks:
+      - hadoop-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "namenode.NameNode || zkfc.ZKFailoverController"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  master2:
+    build:
+      context: .
+    hostname: master2
+    container_name: master2
+    ports:
+      - "9872:9870"
+      - "8082:8088"
+    volumes:
+      - master2-journal:/hadoop/dfs/journal
+      - master2-name:/hadoop/dfs/name
+      - master2-zk:/usr/local/zookeeper/data
+    networks:
+      - hadoop-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "namenode.NameNode || zkfc.ZKFailoverController"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  master3:
+    build:
+      context: .
+    hostname: master3
+    container_name: master3
+    ports:
+      - "9873:9870"
+      - "8083:8088"
+    volumes:
+      - master3-journal:/hadoop/dfs/journal
+      - master3-name:/hadoop/dfs/name
+      - master3-zk:/usr/local/zookeeper/data
+    networks:
+      - hadoop-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "namenode.NameNode || zkfc.ZKFailoverController"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  worker1:
+    build:
+      context: .
+    hostname: worker1
+    container_name: worker1
+    volumes:
+      - worker1-data:/hadoop/dfs/data
+    networks:
+      - hadoop-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "DataNode"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  hadoop-network:
+    driver: bridge
+
+volumes:
+  master1-journal:
+  master1-name:
+  master1-zk:
+  master2-journal:
+  master2-name:
+  master2-zk:
+  master3-journal:
+  master3-name:
+  master3-zk:
+  worker1-data:
+
